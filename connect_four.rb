@@ -56,37 +56,26 @@ class ConnectFour
   end
 
   def check_winner(row, column)
-    check_horizontal(row) || check_vertical(column) || check_diagonals(row, column)
+    check_direction(row, column, 1, 0) ||  # Horizontal
+    check_direction(row, column, 0, 1) ||  # Vertical
+    check_direction(row, column, 1, 1) ||  # Diagonal /
+    check_direction(row, column, 1, -1)    # Diagonal \
   end
 
-  def check_horizontal(row)
-    @board[row].each_cons(4).any? { |sequence| sequence.uniq.size == 1 && sequence.first != ' ' }
+  def check_direction(row, column, row_dir, col_dir)
+    total = 1 + count_consecutive(row, column, row_dir, col_dir) + count_consecutive(row, column, -row_dir, -col_dir)
+    total >= 4
   end
 
-  def check_vertical(column)
-    @board.map { |row| row[column] }.each_cons(4).any? { |sequence| sequence.uniq.size == 1 && sequence.first != ' ' }
-  end
-
-  def check_diagonals(row, column)
-    check_diagonal1(row, column) || check_diagonal2(row, column)
-  end
-
-  def check_diagonal1(row, column)
-    sequence = []
-    (-3..3).each do |i|
-      r, c = row + i, column + i
-      sequence << @board[r][c] if r.between?(0, 5) && c.between?(0, 6)
+  def count_consecutive(row, column, row_dir, col_dir)
+    count = 0
+    current_row, current_col = row + row_dir, column + col_dir
+    while current_row.between?(0, 5) && current_col.between?(0, 6) && @board[current_row][current_col] == @current_player
+      count += 1
+      current_row += row_dir
+      current_col += col_dir
     end
-    sequence.each_cons(4).any? { |seq| seq.uniq.size == 1 && seq.first != ' ' }
-  end
-
-  def check_diagonal2(row, column)
-    sequence = []
-    (-3..3).each do |i|
-      r, c = row + i, column - i
-      sequence << @board[r][c] if r.between?(0, 5) && c.between?(0, 6)
-    end
-    sequence.each_cons(4).any? { |seq| seq.uniq.size == 1 && seq.first != ' ' }
+    count
   end
 end
 
